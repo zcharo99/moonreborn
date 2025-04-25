@@ -7,18 +7,32 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Runtime.InteropServices;
 using System.IO;
 using CloudyApi;
 using Newtonsoft.Json;
+using System.Drawing.Drawing2D;
 
 namespace moonreborn
 {
     public partial class Form1 : Form
     {
+        [DllImport("Gdi32.dll", EntryPoint = "CreateRoundRectRgn")]
+        private static extern IntPtr CreateRoundRectRgn
+        (
+            int nLeftRect,
+            int nTopRect,
+            int nRightRect,
+            int nBottomRect,
+            int nWidthEllipse,
+            int nHeightEllipse
+        );
+
         public Form1()
         {
             InitializeComponent();
             InitializeAsync();
+            Region = System.Drawing.Region.FromHrgn(CreateRoundRectRgn(0, 0, Width, Height, 12, 12));
         }
         Point lastPoint;
 
@@ -44,7 +58,6 @@ namespace moonreborn
         private void Form1_Load(object sender, EventArgs e)
         {
             Api.External.RegisterExecutor("moon reborn");
-            // file:///{Directory.GetCurrentDirectory()}/monaco/index.html
         }
 
         private void Log(string msg)
@@ -82,7 +95,6 @@ namespace moonreborn
                     Api.External.inject();
                     Log("Injected.");
                     Log($"Username: {Api.misc.GetUsername()}");
-                    Log($"Roblox Version: {Api.misc.CheckRobloxVersion()}");
                 }
                 catch (Exception ex) 
                 {
@@ -151,6 +163,11 @@ namespace moonreborn
                 this.Left += e.X - lastPoint.X;
                 this.Top += e.Y - lastPoint.Y;
             }
+        }
+
+        private void button7_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }
