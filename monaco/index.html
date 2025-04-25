@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+    <link rel="stylesheet"
+          data-name="vs/editor/editor.main"
+          href="./vs/editor/editor.main.css" />
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+        }
+
+        #container {
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div id="container"></div>
+    <script src="./vs/loader.js"></script>
+    <script>
+        require.config({ paths: { 'vs': './vs' } });
+        require(['vs/editor/editor.main'], function () {
+            monaco.editor.defineTheme('catppuccin-macchiato', {
+                base: 'vs-dark',
+                inherit: true,
+                rules: [
+                    { token: '', foreground: 'cad3f5', background: '24273a' },
+                    { token: 'comment', foreground: '626880', fontStyle: 'italic' },
+                    { token: 'keyword', foreground: 'c6a0f6' },
+                    { token: 'number', foreground: 'eed49f' },
+                    { token: 'string', foreground: 'a6da95' },
+                    { token: 'variable', foreground: 'f5a97f' },
+                    { token: 'type', foreground: '8aadf4' },
+                ],
+                colors: {
+                    'editor.background': '#24273a',
+                    'editor.foreground': '#cad3f5',
+                    'editorLineNumber.foreground': '#6e738d',
+                    'editorCursor.foreground': '#f4dbd6',
+                    'editorIndentGuide.background': '#3b3f51',
+                    'editorLineNumber.activeForeground': '#f0c6c6',
+                    'editor.selectionBackground': '#5b607844',
+                }
+            });
+
+            window.editor = monaco.editor.create(document.getElementById('container'), {
+                value: '-- yo',
+                language: 'lua',
+                theme: 'catppuccin-macchiato',
+                minimap: {
+                    enabled: false
+                }
+            });
+        });
+        function getEditorContent() {
+            return window.editor.getValue();
+        }
+        function clearEditor() {
+            window.editor.setValue('');
+        }
+    </script>
+</body>
+</html>
