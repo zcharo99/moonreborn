@@ -58,11 +58,16 @@ namespace moonreborn
         private void Form1_Load(object sender, EventArgs e)
         {
             Api.External.RegisterExecutor("moon reborn");
+            Log("INFO", Color.Aqua, "Moon Reborn loaded");
         }
 
-        private void Log(string msg)
+        private void Log(string severity, Color color, string msg)
         {
-            richTextBox1.AppendText("\n" + msg);
+            string timestamp = DateTime.Now.ToString("[HH:mm:ss]");
+            richTextBox1.SelectionColor = Color.Gray;
+            richTextBox1.AppendText(timestamp);
+            richTextBox1.SelectionColor = color;
+            richTextBox1.AppendText(" [" + severity + "] " + msg + "\n");
             richTextBox1.SelectionStart = richTextBox1.Text.Length;
             richTextBox1.ScrollToCaret();
         }
@@ -93,12 +98,11 @@ namespace moonreborn
                 try
                 {
                     Api.External.inject();
-                    Log("Injected.");
-                    Log($"Username: {Api.misc.GetUsername()}");
+                    Log("SUCCESS", Color.Green, "Injected.");
                 }
                 catch (Exception ex) 
                 {
-                    Log($"Could not inject. Exception: {ex}");
+                    Log("ERROR", Color.Red, $"Could not inject. Exception: {ex}");
                 }
             }
             else
@@ -124,7 +128,7 @@ namespace moonreborn
                     }
                     catch (Exception ex)
                     {
-                        Log("Error reading file: " + ex.Message);
+                        Log("ERROR", Color.Red, "Error reading file: " + ex.Message);
                     }
                 }
             }
