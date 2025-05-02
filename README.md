@@ -1,11 +1,14 @@
 # moonreborn
 helo
 
-## how to build
-import the project in Visual Studio 2022
+## How to switch API
+Available APIs are Cloudy, Xeno and Moon.
 
-build it
+To switch between these APIs, you must type
+```lua
+switchapi("[Type the API here]")
+```
+inside the Monaco editor.
 
-copy monaco from project folder to bin
-
-done
+## How to build
+Compile in Visual Studio 2022, and copy `monaco` from the project's folder to the compiled program's folder.
