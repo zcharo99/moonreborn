@@ -2,7 +2,7 @@
 helo
 
 ## How to switch API
-Available APIs are Cloudy, Xeno and Moon.
+Available APIs right now are Cloudy, Xeno and Moon.
 
 To switch between these APIs, you must type
 ```lua
