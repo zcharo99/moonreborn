@@ -10,10 +10,12 @@ using System.Windows.Forms;
 using System.Runtime.InteropServices;
 using System.IO;
 using CloudyApi;
-using QuorumAPI;
-using QuorumXeno;
 using Newtonsoft.Json;
 using System.Drawing.Drawing2D;
+using MoonAPI;
+using System.Diagnostics;
+using System.Threading;
+using Microsoft.Web.WebView2.Core;
 
 namespace moonreborn
 {
@@ -41,10 +43,11 @@ namespace moonreborn
             InitializeAsync();
             Region = System.Drawing.Region.FromHrgn(CreateRoundRectRgn(0, 0, Width, Height, 12, 12));
         }
+
         Point lastPoint;
         bool cloudy;
         bool xeno;
-        bool quorum;
+        bool moon;
 
         private Settings GetLoadedAPI()
         {
@@ -61,9 +64,9 @@ namespace moonreborn
             {
                 updatedSettings.SelectedAPI = "Xeno";
             }
-            else if (quorum)
+            else if (moon)
             {
-                updatedSettings.SelectedAPI = "Quorum";
+                updatedSettings.SelectedAPI = "Moon";
             }
             else
             {
@@ -105,20 +108,25 @@ namespace moonreborn
             await webView21.CoreWebView2.ExecuteScriptAsync($"window.editor.setValue({escapedContent});");
         }
 
-        private void Form1_Load(object sender, EventArgs e)
+        void UpdateStatus()
+        {
+            guna2CircleButton1.DisabledState.FillColor = guna2CircleButton1.FillColor;
+            guna2CircleButton1.DisabledState.BorderColor = guna2CircleButton1.FillColor;
+            guna2CircleButton1.DisabledState.CustomBorderColor = guna2CircleButton1.FillColor;
+            guna2CircleButton1.DisabledState.ForeColor = guna2CircleButton1.FillColor;
+        }
+
+        private async void Form1_Load(object sender, EventArgs e)
         {
             Api.External.RegisterExecutor("moon reborn");
-            QuorumXeno.QuorumXeno._attachNotifyTitle = "moon reborn";
-            QuorumXeno.QuorumXeno._attachNotifyText = "moon xeno (quorum) mode";
-            QuorumAPI.QuorumAPI._attachNotifyTitle = "moon reborn";
-            QuorumAPI.QuorumAPI._attachNotifyText = "moon quorum (nezur) mode";
+            MoonAPI.MoonAPI.Configure("moon api injected", "moon reborn");
             Log("INFO", Color.Aqua, "Moon Reborn loaded");
 
             if (!File.Exists("settings.json"))
             {
                 Settings defaultSettings = new Settings
                 {
-                    SelectedAPI = "Cloudy"
+                    SelectedAPI = "Moon"
                 };
                 string defaultJson = JsonConvert.SerializeObject(defaultSettings, Formatting.Indented);
                 try
@@ -137,22 +145,23 @@ namespace moonreborn
             if (settings.SelectedAPI == "Cloudy")
             {
                 xeno = false;
-                quorum = false;
+                moon = false;
                 cloudy = true;
             }
             else if (settings.SelectedAPI == "Xeno")
             {
                 cloudy = false;
-                quorum = false;
+                moon = false;
                 xeno = true;
             }
-            else if (settings.SelectedAPI == "Quorum")
+            else if (settings.SelectedAPI == "Moon")
             {
                 xeno = false;
                 cloudy = false;
-                quorum = true;
+                moon = true;
             }
-            Log("DEBUG", Color.Pink, $"Cloudy: {cloudy}, Xeno: {xeno}, Quorum: {quorum}");
+            // Log("DEBUG", Color.Pink, $"Cloudy: {cloudy}, Xeno: {xeno}, Moon: {moon}");
+            UpdateStatus();
         }
 
         public void Log(string severity, Color color, string msg)
@@ -175,7 +184,7 @@ namespace moonreborn
             if (content == "switchapi(\"Cloudy\")")
             {
                 xeno = false;
-                quorum = false;
+                moon = false;
                 cloudy = true;
                 Log("INFO", Color.Aqua, "Switched API to Cloudy");
                 UpdateSettingsFile();
@@ -184,19 +193,19 @@ namespace moonreborn
             else if (content == "switchapi(\"Xeno\")")
             {
                 cloudy = false;
-                quorum = false;
+                moon = false;
                 xeno = true;
                 UpdateSettingsFile();
-                Log("INFO", Color.Aqua, "Switched API to Xeno (Quorum)");
+                Log("INFO", Color.Aqua, "Switched API to Xeno");
                 return;
             }
-            else if (content == "switchapi(\"Quorum\")")
+            else if (content == "switchapi(\"Moon\")")
             {
                 xeno = false;
                 cloudy = false;
-                quorum = true;
+                moon = true;
                 UpdateSettingsFile();
-                Log("INFO", Color.Aqua, "Switched API to Quorum (Nezur)");
+                Log("INFO", Color.Aqua, "Switched API to Moon (Nezur)");
                 return;
             }
 
@@ -213,24 +222,24 @@ namespace moonreborn
             }
             else if (xeno)
             {
-                if (!(QuorumXeno.QuorumXeno.GetAttachState() == 1))
+                if (!XenoFuncs.IsInjected())
                 {
                     MessageBox.Show("Please inject before executing");
                 }
                 else
                 {
-                    QuorumXeno.QuorumXeno.ExecuteScript(content);
+                    XenoFuncs.ExecuteScript(content);
                 }
             }
-            else if (quorum)
+            else if (moon)
             {
-                if (!(QuorumAPI.QuorumAPI.GetAttachState() == 1))
+                if (!MoonAPI.MoonAPI.IsInjected())
                 {
                     MessageBox.Show("Please inject before executing");
                 }
                 else
                 {
-                    QuorumAPI.QuorumAPI.ExecuteScript(content);
+                    MoonAPI.MoonAPI.ExecuteScript(content);
                 }
             }
         }
@@ -266,17 +275,19 @@ namespace moonreborn
             }
             else if (xeno)
             {
-                if (QuorumXeno.QuorumXeno.IsRobloxOpen() && !(QuorumXeno.QuorumXeno.GetAttachState() == 1))
+                if (MoonAPI.MoonAPI.IsRobloxOpen() && !XenoFuncs.IsInjected())
                 {
                     try
                     {
-                        QuorumXeno.QuorumXeno.AttachAPI();
-                        QuorumXeno.QuorumXeno.ExecuteScript("warn(\"[MOON] Moon Reborn injected with Xeno API (Quorum)\")");
+                        XenoFuncs.Inject();
+                        XenoFuncs.ExecuteScript("warn(\"[MOON] Moon Reborn injected with Xeno API (Quorum)\")");
                         Log("SUCCESS", Color.Green, "Injected.");
+                        Log("DEBUG", Color.Pink, "IsInjected: " + XenoFuncs.IsInjected().ToString());
                     }
                     catch (Exception ex)
                     {
-                        Log("ERROR", Color.Red, $"Could not inject. Exception: {ex}");
+                        // Log("ERROR", Color.Red, $"Could not inject. Exception: {ex}");
+                        MessageBox.Show(ex.ToString());
                     }
                 }
                 else
@@ -284,14 +295,14 @@ namespace moonreborn
                     MessageBox.Show("Already injected/Roblox is not open.");
                 }
             }
-            else if (quorum)
+            else if (moon)
             {
-                if (QuorumAPI.QuorumAPI.IsRobloxOpen() && !(QuorumAPI.QuorumAPI.GetAttachState() == 1))
+                if (MoonAPI.MoonAPI.IsRobloxOpen() && !MoonAPI.MoonAPI.IsInjected())
                 {
                     try
                     {
-                        QuorumAPI.QuorumAPI.AttachAPI();
-                        QuorumAPI.QuorumAPI.ExecuteScript("warn(\"[MOON] Moon Reborn injected with Quorum API (Nezur)\")");
+                        MoonAPI.MoonAPI.Inject();
+                        MoonAPI.MoonAPI.ExecuteScript("warn(\"[MOON] Moon Reborn injected with Moon API (Nezur)\")");
                         Log("SUCCESS", Color.Green, "Injected.");
                     }
                     catch (Exception ex)
@@ -304,6 +315,8 @@ namespace moonreborn
                     MessageBox.Show("Already Injected/Roblox is not open.");
                 }
             }
+            guna2CircleButton1.FillColor = Color.FromArgb(128, 255, 128);
+            UpdateStatus();
         }
 
         // open file

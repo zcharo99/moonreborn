@@ -6,8 +6,6 @@
           data-name="vs/editor/editor.main"
           href="./vs/editor/editor.main.css" />
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap');
-
         html, body {
             height: 100%;
             margin: 0;
@@ -19,16 +17,11 @@
     </style>
 </head>
 <body>
-    <div id="tabs" style="display: flex; background-color: rgb(24, 25, 38); font-family: Lato;">
-         <div id="tab" style="display: flex; align-items: center; justify-items: center; background-color: rgb(36, 39, 58); gap: 10px; padding: 0 15px">
-            <p id="tab-name" style="color: rgb(202, 211, 245); transform: translateY(-2px);">New Tab 1</p>
-            <a id="tab-close" href="#" style="text-decoration: none;"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" style="fill: rgb(202, 211, 245);transform: ;msFilter:;"><path d="m16.192 6.344-4.243 4.242-4.242-4.242-1.414 1.414L10.535 12l-4.242 4.242 1.414 1.414 4.242-4.242 4.243 4.242 1.414-1.414L13.364 12l4.242-4.242z"></path></svg></a>
-         </div>
-    </div>
     <div id="container"></div>
     <script src="./vs/loader.js"></script>
     <script>
         require.config({ paths: { 'vs': './vs' } });
+
         require(['vs/editor/editor.main'], function () {
             monaco.editor.defineTheme('catppuccin-macchiato', {
                 base: 'vs-dark',
@@ -54,7 +47,7 @@
             });
 
             window.editor = monaco.editor.create(document.getElementById('container'), {
-                value: '-- yo',
+                value: savedContent,
                 language: 'lua',
                 theme: 'catppuccin-macchiato',
                 minimap: {
@@ -62,13 +55,14 @@
                 }
             });
         });
+
         function getEditorContent() {
             return window.editor.getValue();
         }
+
         function clearEditor() {
             window.editor.setValue('');
         }
     </script>
-    <script src="tabs.js"></script>
 </body>
 </html>
